@@ -61,12 +61,12 @@ class BasicLayer(nn.Module):
         else:
             self.downsample = None
     def forward(self, x):
-        # Upsample if Decoder
-        if self.upsample:
-            x = self.upsample(x)
         # Pass through Swin Transformer Blocks
         for blk in self.blocks:
             x = blk(x)
+        # Upsample if Decoder
+        if self.upsample:
+            x = self.upsample(x)
         # Downsample if Encoder
         if self.downsample:
             x = self.downsample(x)

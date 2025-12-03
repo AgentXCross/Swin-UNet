@@ -77,22 +77,28 @@ class Encoder(nn.Module):
             downsample = False
         )
     def forward(self, x):
-        # Partition patches into (B, H/4, W/4, 48)
         x = self.patch_partition(x)
-        # Linear embedding -> (B, C, H/4, W/4)
         x = self.linear_embed(x)
-        # Save skip connections in order: shallow -> deep
         skips = []
         # Stage 1 (1/4)
-        x = self.stage1(x)
+        for blk in self.stage1.blocks:
+            x = blk(x)
         skips.append(x)
+        if self.stage1.downsample is not None:
+            x = self.stage1.downsample(x)
         # Stage 2 (1/8)
-        x = self.stage2(x)
+        for blk in self.stage2.blocks:
+            x = blk(x)
         skips.append(x)
+        if self.stage2.downsample is not None:
+            x = self.stage2.downsample(x)
         # Stage 3 (1/16)
-        x = self.stage3(x)
+        for blk in self.stage3.blocks:
+            x = blk(x)
         skips.append(x)
+        if self.stage3.downsample is not None:
+            x = self.stage3.downsample(x)
         # Bottleneck (1/32)
-        x = self.bottleneck(x)
-        # Return: bottleneck first, then skips deepest -> shallow
+        for blk in self.bottleneck.blocks:
+            x = blk(x)
         return [x, skips[2], skips[1], skips[0]]
