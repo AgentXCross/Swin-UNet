@@ -30,5 +30,23 @@ class PatchPartition(nn.Module):
         return x
 
 class LinearEmbedding(nn.Module):
-    
-
+    """
+    Projects flattened patch vectors into model embedding dimension.
+    Input Shape:
+        (B, H/p, W/p, C * p * p)
+    Operation:
+        - Applies a linear layer to each patch vector
+        - Maps the raw patch dimension to embed_dim
+        - Rearranges result to (B, embed_dim, H/p, W/p) for downstream Swin blocks
+    Output Shape:
+        (B, embed_dim, H/p, W/p)
+    First learnable layer in Swin-UNet. Converts raw patch tokens into feature
+    embeddings the transformer blocks can process.
+    """
+    def __init__(self, patch_dim, embed_dim):
+        super().__init__()
+        self.proj = nn.Linear(patch_dim, embed_dim)
+    def forward(self, x):
+        x = self.proj(x)
+        x = x.permute(0, 3, 1, 2) # Rearrange to channel-first format
+        return x
