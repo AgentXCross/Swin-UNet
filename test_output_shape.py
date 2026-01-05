@@ -2,11 +2,11 @@ import torch
 from model.swin_unet import SwinUNet
 
 def main():
-    # Dummy 1024×1024 RGB input
-    x = torch.randn(1, 3, 1024, 1024)
+    # Dummy 512x512 RGB input
+    x = torch.randn(16, 3, 512, 512)
     # Initialize Model
     model = SwinUNet(
-        img_size = 1024,
+        img_size = 512,
         in_channels = 3,
         out_channels = 5, # 5 independent masks
         embed_dim = 96,
